@@ -85,7 +85,7 @@ def get_floor(point_cloud):
 
 
 def get_floor_indices(point_cloud, z_floor_coordinate):
-    buffer_min = 0.05
+    buffer_min = 0.5
     buffer_max = 0.05
 
     point_cloud_copy = copy.deepcopy(point_cloud)
@@ -121,8 +121,8 @@ def extract_floor(trial, anno_frame_ids, point_cloud_dir, labels_dir):
         calibration_dict = json.load(f)
 
     for frame_id in tqdm(anno_frame_ids, desc="Extracting the floor..."):
-        pcd_filename = os.path.join(point_cloud_dir, f"{str(frame_id).zfill(4)}_pointcloud.ply")
-        label_filename = os.path.join(labels_dir, f"{str(frame_id).zfill(4)}_pointcloud.label")
+        pcd_filename = os.path.join(point_cloud_dir, f"{str(frame_id).zfill(10)}_pointcloud.ply")
+        label_filename = os.path.join(labels_dir, f"{str(frame_id).zfill(10)}_pointcloud.label")
         point_cloud = o3d.io.read_point_cloud(pcd_filename)
 
         indices =  get_floor_indices(point_cloud, calibration_dict["floor"])

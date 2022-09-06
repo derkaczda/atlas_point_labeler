@@ -50,8 +50,8 @@ def extract_wall(trial, anno_frame_ids, point_cloud_dir, labels_dir):
 
     for frame_id in tqdm(anno_frame_ids, desc="Extracting walls..."):
 
-        pcd_filename = os.path.join(point_cloud_dir, f"{str(frame_id).zfill(4)}_pointcloud.ply")
-        label_filename = os.path.join(labels_dir, f"{str(frame_id).zfill(4)}_pointcloud.label")
+        pcd_filename = os.path.join(point_cloud_dir, f"{str(frame_id).zfill(10)}_pointcloud.ply")
+        label_filename = os.path.join(labels_dir, f"{str(frame_id).zfill(10)}_pointcloud.label")
         point_coud = o3d.io.read_point_cloud(pcd_filename)
 
         indices = prune_point_clouds(point_coud, 

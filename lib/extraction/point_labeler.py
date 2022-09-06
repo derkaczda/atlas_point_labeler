@@ -54,8 +54,8 @@ class PointLabeler:
         data_dir = os.path.join('data', 'label_data', self.vis_trial)
 
         for frame_id in tqdm(self.vis_frame_ids, desc="Reading the point clouds"):
-            point_cloud = o3d.io.read_point_cloud(os.path.join(data_dir, "point_clouds", f"{str(frame_id).zfill(4)}_pointcloud.ply"))
-            labels = labelutil.read_labels(os.path.join(data_dir, "labels", f"{str(frame_id).zfill(4)}_pointcloud.label"))
+            point_cloud = o3d.io.read_point_cloud(os.path.join(data_dir, "point_clouds", f"{str(frame_id).zfill(10)}_pointcloud.ply"))
+            labels = labelutil.read_labels(os.path.join(data_dir, "labels", f"{str(frame_id).zfill(10)}_pointcloud.label"))
 
             assert(len(point_cloud.points) == len(labels))
 
@@ -107,22 +107,25 @@ class PointLabeler:
                 # Create the merged point clouds and labels
                 for frame_id in tqdm(self.anno_frame_ids, desc="Writing merged point clouds"):
                     merged_point_cloud = o3d.geometry.PointCloud()
-                    file_id = str(frame_id).zfill(4)
+                    file_id = str(frame_id).zfill(10)
                     # get point clouds and origins
-                    for cam in cameras:
+                    # for cam in cameras:
+                    #
+                    #     fpath = os.path.join(data_dir, cam, f"{file_id}_pointcloud.ply")
+                    #     if not os.path.exists(fpath):
+                    #         logger.warn("File does not exist: {}".format(fpath))
+                    #
+                    #     merged_point_cloud += o3d.io.read_point_cloud(fpath)
 
-                        fpath = os.path.join(data_dir, cam, f"{file_id}_pointcloud.ply")
-                        if not os.path.exists(fpath):
-                            logger.warn("File does not exist: {}".format(fpath))
-
-                        merged_point_cloud += o3d.io.read_point_cloud(fpath)
-                    
+                    merged_point_cloud = o3d.io.read_point_cloud(
+                        os.path.join(data_dir, f"{file_id}_pointcloud.ply")
+                    )
                     o3d.io.write_point_cloud(pcd_file:=os.path.join(point_cloud_output_dir, f"{file_id}_pointcloud.ply"), merged_point_cloud)
 
                     # create label file filled with 0s
                     contents = struct.pack('<I', 0) * len(merged_point_cloud.points)
 
-                    with open(label_file:=os.path.join(labels_dir, f"{str(frame_id).zfill(4)}_pointcloud.label"), "bw") as f:
+                    with open(label_file:=os.path.join(labels_dir, f"{str(frame_id).zfill(10)}_pointcloud.label"), "bw") as f:
                         f.write(contents)
 
                     logger.debug(f"Written: {pcd_file} and {label_file}")
@@ -171,16 +174,15 @@ def create_first_pcd(trial):
 
     cameras = next(os.walk(trial_path))[1]
 
-    for camera in cameras:
-        cam_path = os.path.join(trial_path, camera)
-        path_to_first_pcd = list(sorted(glob(cam_path + '/*.ply')))[0]
-
-        merged_pcd += o3d.io.read_point_cloud(path_to_first_pcd)
-        logger.debug(f"Added {path_to_first_pcd} to the merged point cloud")
+    # for camera in cameras:
+    #     cam_path = os.path.join(trial_path, camera)
+    #     path_to_first_pcd = list(sorted(glob(cam_path + '/*.ply')))[0]
+    #
+    #     merged_pcd += o3d.io.read_point_cloud(path_to_first_pcd)
+    #     logger.debug(f"Added {path_to_first_pcd} to the merged point cloud")
+    cam_path = os.path.join(trial_path)
+    merged_pcd = o3d.io.read_point_cloud(
+        list(sorted(glob(cam_path+'/*_pointcloud.ply')))[0]
+    )
 
     return merged_pcd
-
-
-
-
-    
